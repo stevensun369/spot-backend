@@ -17,6 +17,7 @@ var Client *mongo.Client
 
 // collections
 var Accounts *mongo.Collection
+var Spots *mongo.Collection
 
 func InitDB() error {
 	var err error
@@ -32,6 +33,7 @@ func InitDB() error {
 
 	// loading collections
 	Accounts = GetCollection("accounts", Client)
+	Spots = GetCollection("spots", Client)
 
 	fmt.Println("Connected to mongodb")
 	return nil

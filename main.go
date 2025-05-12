@@ -3,6 +3,7 @@ package main
 import (
 	"backend/accounts"
 	"backend/db"
+	"backend/spots"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -18,6 +19,7 @@ func main() {
 	})
 
 	accounts.Endpoints(app)
+	spots.Endpoints(app)
 
 	app.Listen(":3000")
 }
