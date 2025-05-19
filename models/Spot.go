@@ -8,20 +8,20 @@ import (
 )
 
 type Spot struct {
-	ID          string      `bson:"id" json:"id"`
-	Name        string      `bson:"name" json:"name"`
-	Description string      `bson:"description" json:"description"`
-	Location    GeoLocation `bson:"location" json:"location"`
-	Tags        []string    `bson:"tags" json:"tags"`
-	Address     string      `bson:"address" json:"address"`
-	Phone       string      `bson:"phone" json:"phone"`
-	Website     string      `bson:"website" json:"website"`
-	Type        string      `bson:"type" json:"type"`
+	ID          string       `bson:"id" json:"id"`
+	Name        string       `bson:"name" json:"name"`
+	Description string       `bson:"description" json:"description"`
+	Location    GeoJSONPoint `bson:"location" json:"location"`
+	Tags        []string     `bson:"tags" json:"tags"`
+	Address     string       `bson:"address" json:"address"`
+	Phone       string       `bson:"phone" json:"phone"`
+	Website     string       `bson:"website" json:"website"`
+	Type        string       `bson:"type" json:"type"`
 }
 
-type GeoLocation struct {
-	Latitude  float64
-	Longitude float64
+type GeoJSONPoint struct {
+	Type        string    `bson:"type" json:"type"`
+	Coordinates []float64 `bson:"coordinates" json:"coordinates"`
 }
 
 func (spot *Spot) Create() error {
@@ -58,11 +58,9 @@ func GetSpots() (spots []Spot, err error) {
 	return spots, nil
 }
 
-func GetSpotsFilter(center GeoLocation, radius int, tags []string) (spots []Spot, err error) {
+func GetSpotsFilter(center []float64, radius int, tags []string) (spots []Spot, err error) {
 	earthRadiusMeters := 6378127.0
 	radiusRadians := float64(radius) / earthRadiusMeters
-
-	centerArr := [2]float64{center.Longitude, center.Latitude}
 
 	filter := bson.M{}
 
@@ -70,17 +68,21 @@ func GetSpotsFilter(center GeoLocation, radius int, tags []string) (spots []Spot
 	// it will not include them in the query
 	if len(tags) == 0 {
 		filter = bson.M{
-			"$geoWithin": bson.M{
-				"$centerSphere": bson.A{
-					centerArr, radiusRadians,
+			"location": bson.M{
+				"$geoWithin": bson.M{
+					"$centerSphere": bson.A{
+						center, radiusRadians,
+					},
 				},
 			},
 		}
 	} else {
 		filter = bson.M{
-			"$geoWithin": bson.M{
-				"$centerSphere": bson.A{
-					centerArr, radiusRadians,
+			"location": bson.M{
+				"$geoWithin": bson.M{
+					"$centerSphere": bson.A{
+						center, radiusRadians,
+					},
 				},
 			},
 			"tags": bson.M{
